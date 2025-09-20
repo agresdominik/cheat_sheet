@@ -1,0 +1,72 @@
+{
+  "linux": [
+    {
+      "command": "du -sh --block-size=1M /path/to/directory",
+      "desc": "Show size of directory in MB (Change M to G for GB)"
+    },
+    {
+      "command": "df -h /path/to/mount",
+      "desc": "Show statistics about a drive (remove path for all)"
+    },
+    {
+      "command": "find /path/to/directory -type f | wc -l",
+      "desc": "Show amount of files in directory and its sub-directories"
+    },
+    {
+      "command": "find /path/to/directory -type f -exec grep -n 'search' {} +",
+      "desc": "Print all rows together with the filenames and rows a string is found in"
+    },
+    {
+      "command": "ss -tuln",
+      "desc": "Show open ports on current host (linux)"
+    },
+    {
+      "command": "echo Hostname: $(hostname); echo Local_IP: $(hostname -I | awk '{print $1}'); echo Default_Gateway: $(ip route | awk '/default/ {print $3}')",
+      "desc": "Print IP Address, Hostname, Default Route"
+    }
+  ],
+  "python": [
+    {
+      "command": "python3 -m venv .venv; source .venv/bin/activate",
+      "desc": "Initialise a (simple) .venv and activate it"
+    },
+    {
+      "command": "command",
+      "desc": "Initialise a poetry project"
+    },
+    {
+      "command": "command",
+      "desc": "..."
+    }
+  ],
+  "go": [
+    {
+      "command": "go mod init github.com/username/projectname",
+      "desc": "Initialise a go project"
+    },
+    {
+      "command": "go get github.com/some/package@latest",
+      "desc": "Add dependencies (cringe)"
+    },
+    {
+      "command": "go mod tidy",
+      "desc": "Tidy up unused dependencies"
+    },
+    {
+      "command": "go mod verify",
+      "desc": "Verify Integrity"
+    },
+    {
+      "command": "go run src/main.go",
+      "desc": "Run a main.go file"
+    },
+    {
+      "command": "go build -o bin/myprogram main.go",
+      "desc": "Build an executable"
+    },
+    {
+      "command": "GOOS=linux GOARCH=amd64 go build -o bin/myprogram.exe main.go",
+      "desc": "Cross-compile for Linux (alt. windows, darwin (arm64 / amd64))"
+    }
+  ]
+}
