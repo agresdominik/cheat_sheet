@@ -45,7 +45,6 @@
 *.pdb
 
 # Kernel Module Compile Results
-*.mod*
 *.cmd
 .tmp_versions/
 modules.order
@@ -57,6 +56,4 @@ dkms.conf
 *.dwo
 
 # Go
-*.sum
-*.mod
 bin/*
