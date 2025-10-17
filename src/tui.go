@@ -1,97 +1,154 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"sort"
 	"log"
 	"os"
-	"encoding/json"
+	//"sort"
+	//"strings"
 
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
-var commandsFile []byte
-
+type CmdMap map[string][]CmdItem
 type CmdItem struct {
 	CommandName        string `json:"command"`
 	CommandDescription string `json:"desc"`
 }
-type CmdMap map[string][]CmdItem
 
+type item struct {
+	title 			string
+	description 	string
+}
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.description }
+func (i item) FilterValue() string { return i.title }
+
+type view int
+
+type model struct {
+	list 		list.Model
+	commands 	CmdMap
+	currentView view
+	currentKey	string
+	selectedCmd string
+}
+func (m model) Init() tea.Cmd { return nil }
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	switch msg := msg.(type) {
+
+		case tea.KeyMsg:
+
+			switch msg.String() {
+
+				case "ctrl+c", "q":
+					return m, tea.Quit
+
+				case "enter":
+					selected, ok := m.list.SelectedItem().(item)
+					if ok {
+						if m.currentView == viewCategories {
+							m.currentKey = selected.title
+							m.currentView = viewCommands
+							m.list.Title = m.currentKey
+							m.list.SetItems(cmdItemsToList(m.commands[m.currentKey]))
+					} else if m.currentView == viewCommands {
+							m.selectedCmd = selected.title
+							return m, tea.Quit
+						}
+					}
+
+				case "b":
+
+					if m.currentView == viewCommands {
+						m.currentView = viewCategories
+						m.list.Title = "Choose a list of commands"
+						m.list.SetItems(cmdMapKeysToList(m.commands))
+					}
+
+			}
+
+		case tea.WindowSizeMsg:
+			h, v := docStyle.GetFrameSize()
+			m.list.SetSize(msg.Width-h, msg.Height-v)
+
+	}
+
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+
+}
+
+func (m model) View() string {
+	return docStyle.Render(m.list.View())
+}
+
+var docStyle = lipgloss.NewStyle().Margin(1, 2)
+
+const (
+	viewCategories view = iota
+	viewCommands
+)
 
 func StartTui(configFilePath ...string) {
 
-	var configFilePathString string
-    if len(configFilePath) > 0 {
-        configFilePathString = configFilePath[0]
-    } else {
-        configFilePathString = "/etc/cheatsh/commands.json"
-    }
-	commands, err := loadCommands(configFilePathString)
+	configFile := "/etc/cheatsh/commands.json"
+	if len(configFilePath) > 0 {
+		configFile = configFilePath[0]
+	}
+
+	commands, err := loadCommands(configFile)
 	if err != nil {
 		log.Fatalf("Cannot load commands file: %v", err)
 	}
 
-	app := tview.NewApplication()
+	// ToDo: Sort Items
+	// ToDo: Handle readout of file before calling this function
 
-	// Sort alphabetically
-	langs := make([]string, 0, len(commands))
-	for lang := range commands {
-		langs = append(langs, lang)
-	}
-	sort.Strings(langs)
-
-	langList := tview.NewList()
-	langList.SetBorder(true).SetTitle("Select a topic")
-
-	for _, lang := range langs {
-		lang := lang
-		langList.AddItem(lang, "", 0, func() {
-			showCommandList(app, lang, commands[lang], langList)
-		})
-	}
-
-	langList.SetWrapAround(false).SetHighlightFullLine(true)
-	langList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 'b' || event.Key() == tcell.KeyEscape {
-			app.Stop()
-			os.Exit(0)
+	delegate := list.NewDefaultDelegate()
+	backKey := key.NewBinding(
+	    key.WithKeys("b"),
+	    key.WithHelp("b", "back"),
+	)
+	delegate.ShortHelpFunc = func() []key.Binding{
+		return []key.Binding{
+			backKey,
 		}
-		return event
-	})
-
-	if err := app.SetRoot(langList, true).Run(); err != nil {
-		log.Fatalf("Error initialising TUI: %v", err)
 	}
-}
-
-func showCommandList(app *tview.Application, lang string, cmds []CmdItem, langList *tview.List) {
-	cmdList := tview.NewList()
-	cmdList.SetBorder(true).SetTitle(fmt.Sprintf("%s commands", lang))
-
-	for _, c := range cmds {
-		c := c
-		cmdList.AddItem(c.CommandName, c.CommandDescription, 0, func() {
-			app.Suspend(func() {
-				fmt.Println(c.CommandName)
-			})
-			app.Stop()
-			os.Exit(0)
-		})
-	}
-
-	cmdList.SetWrapAround(false).SetHighlightFullLine(true)
-	cmdList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 'b' || event.Key() == tcell.KeyEscape {
-			// Restore the language list
-			app.SetRoot(langList, true)
-			return nil
+	delegate.FullHelpFunc = func() [][]key.Binding{
+		return [][]key.Binding{
+			{backKey},
 		}
-		return event
-	})
+	}
 
-	app.SetRoot(cmdList, true)
+	items := cmdMapKeysToList(commands)
+	l := list.New(items, delegate, 0, 0)
+	l.Title = "Choose a list of commands"
+
+	m := model{
+		list:        l,
+		commands:    commands,
+		currentView: viewCategories,
+	}
+
+	p := tea.NewProgram(m, tea.WithAltScreen())
+	finalModel, err := p.Run()
+	if err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
+
+	if m, ok := finalModel.(model); ok && m.selectedCmd != "" {
+		fmt.Println(m.selectedCmd)
+	}
 }
 
 func loadCommands(path string) (CmdMap, error) {
@@ -108,4 +165,32 @@ func loadCommands(path string) (CmdMap, error) {
 	}
 
 	return m, nil
+}
+
+func cmdMapKeysToList(m CmdMap) []list.Item {
+
+	items := []list.Item{}
+
+	for name, _ := range m {
+		listItem := item{
+			title: name,
+			description: "",
+		}
+		items = append(items, listItem)
+	}
+	return items
+}
+
+func cmdItemsToList(cmds []CmdItem) []list.Item {
+
+	items := []list.Item{}
+
+	for _, command := range cmds {
+		listItem := item{
+			title: command.CommandName,
+			description: command.CommandDescription,
+		}
+		items = append(items, listItem)
+	}
+	return items
 }

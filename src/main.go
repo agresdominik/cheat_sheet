@@ -11,6 +11,7 @@ func main() {
 
 	configFlag := flag.String("config", "", "Specify a config file")
 	helpFlag := flag.Bool("help", false, "Show help")
+	newFlag := flag.Bool("new", false, "Add new command to config")
 
 	flag.Parse()
 
@@ -24,6 +25,8 @@ func main() {
 			printHelp()
 		case *configFlag != "":
 			StartTui(*configFlag)
+		case *newFlag:
+			HandleInput()
 		default:
 			printHelp()
 			os.Exit(1)
@@ -34,5 +37,6 @@ func printHelp() {
 	fmt.Println(`Usage: cheatsh [options]
 	Options:
 	  --config <file>  Specify a config file
-	  --help           Show this help message`)
+	  --help           Show this help message
+	  --new 		   Add a new command to the config file`)
 }

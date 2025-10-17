@@ -29,3 +29,6 @@ clean:
 docker:
 	docker build -t cheatsh-test .
 	docker run -it --rm cheatsh-test /bin/sh
+
+local: build
+	./bin/cheatsh --config ./data/commands.json
