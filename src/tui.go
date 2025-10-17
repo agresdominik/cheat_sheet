@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	//"sort"
 	//"strings"
@@ -15,11 +13,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type CmdMap map[string][]CmdItem
-type CmdItem struct {
-	CommandName        string `json:"command"`
-	CommandDescription string `json:"desc"`
-}
 
 type item struct {
 	title 			string
@@ -33,7 +26,7 @@ type view int
 
 type model struct {
 	list 		list.Model
-	commands 	CmdMap
+	commands 	CmdList
 	currentView view
 	currentKey	string
 	selectedCmd string
@@ -58,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							m.currentKey = selected.title
 							m.currentView = viewCommands
 							m.list.Title = m.currentKey
-							m.list.SetItems(cmdItemsToList(m.commands[m.currentKey]))
+							m.list.SetItems(cmdItemsToList(m.commands.Get(m.currentKey)))
 					} else if m.currentView == viewCommands {
 							m.selectedCmd = selected.title
 							return m, tea.Quit
@@ -70,7 +63,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.currentView == viewCommands {
 						m.currentView = viewCategories
 						m.list.Title = "Choose a list of commands"
-						m.list.SetItems(cmdMapKeysToList(m.commands))
+						m.list.SetItems(cmdListKeysToList(m.commands))
 					}
 
 			}
@@ -98,20 +91,7 @@ const (
 	viewCommands
 )
 
-func StartTui(configFilePath ...string) {
-
-	configFile := "/etc/cheatsh/commands.json"
-	if len(configFilePath) > 0 {
-		configFile = configFilePath[0]
-	}
-
-	commands, err := loadCommands(configFile)
-	if err != nil {
-		log.Fatalf("Cannot load commands file: %v", err)
-	}
-
-	// ToDo: Sort Items
-	// ToDo: Handle readout of file before calling this function
+func StartTui(commands CmdList) {
 
 	delegate := list.NewDefaultDelegate()
 	backKey := key.NewBinding(
@@ -129,7 +109,7 @@ func StartTui(configFilePath ...string) {
 		}
 	}
 
-	items := cmdMapKeysToList(commands)
+	items := cmdListKeysToList(commands)
 	l := list.New(items, delegate, 0, 0)
 	l.Title = "Choose a list of commands"
 
@@ -151,34 +131,16 @@ func StartTui(configFilePath ...string) {
 	}
 }
 
-func loadCommands(path string) (CmdMap, error) {
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var m CmdMap
-	err = json.Unmarshal(data, &m)
-	if err != nil {
-		return nil, err
-	}
-
-	return m, nil
-}
-
-func cmdMapKeysToList(m CmdMap) []list.Item {
-
-	items := []list.Item{}
-
-	for name, _ := range m {
-		listItem := item{
-			title: name,
-			description: "",
-		}
-		items = append(items, listItem)
-	}
-	return items
+func cmdListKeysToList(cmds CmdList) []list.Item {
+    items := []list.Item{}
+    for _, group := range cmds {
+        listItem := item{
+            title:       group.Category,
+            description: "",
+        }
+        items = append(items, listItem)
+    }
+    return items
 }
 
 func cmdItemsToList(cmds []CmdItem) []list.Item {
