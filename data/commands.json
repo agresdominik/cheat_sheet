@@ -27,26 +27,18 @@
   ],
   "python": [
     {
-      "command": "python3 -m venv .venv; source .venv/bin/activate",
+      "command": "python3 -m venv .venv && source .venv/bin/activate",
       "desc": "Initialise a (simple) .venv and activate it"
-    },
-    {
-      "command": "command",
-      "desc": "Initialise a poetry project"
-    },
-    {
-      "command": "command",
-      "desc": "..."
     }
   ],
   "go": [
     {
       "command": "go mod init github.com/username/projectname",
-      "desc": "Initialise a go project"
+      "desc": "Initialise a go project and create a mod file"
     },
     {
       "command": "go get github.com/some/package@latest",
-      "desc": "Add dependencies (cringe)"
+      "desc": "Add dependencies"
     },
     {
       "command": "go mod tidy",
@@ -57,11 +49,11 @@
       "desc": "Verify Integrity"
     },
     {
-      "command": "go run src/main.go",
+      "command": "go run <target_file_or_folder>",
       "desc": "Run a main.go file"
     },
     {
-      "command": "go build -o bin/myprogram main.go",
+      "command": "go build -o bin/<bin_name> <target_file_or_folder>",
       "desc": "Build an executable"
     },
     {
@@ -73,6 +65,18 @@
     {
       "command": "git checkout -b branch_name",
       "desc": "Create and checkout a new branch"
+    },
+    {
+      "command": "git rebase <target_branch>",
+      "desc": "Rebase commits from source branch to target branch"
+    },
+    {
+      "command": "git stash",
+      "desc": "Stash changes without commiting"
+    },
+    {
+      "command": "git reflog",
+      "desc": "Show history of all changes"
     }
   ]
 }
