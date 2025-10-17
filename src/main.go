@@ -1,96 +1,112 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
+	"flag"
+	"encoding/json"
+	"log"
 	"sort"
-
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 )
 
-// Individual Command Items Later Extracted
+type CmdGroup struct {
+    Category string
+    Commands []CmdItem
+}
+
+type CmdList []CmdGroup
+
 type CmdItem struct {
 	CommandName        string `json:"command"`
 	CommandDescription string `json:"desc"`
 }
 
-// All commands
-type CmdMap map[string][]CmdItem
+func (list CmdList) Get(category string) []CmdItem {
+	for _, group := range list {
+		if group.Category == category {
+			return group.Commands
+		}
+	}
+	return nil
+}
 
-// Read Json-File and return it
-func loadCommands(path string) (CmdMap, error) {
+
+func main() {
+
+	configFlag := flag.String("config", "", "Specify a config file")
+	helpFlag := flag.Bool("help", false, "Show help")
+	newFlag := flag.Bool("new", false, "Add new command to config")
+
+	flag.Parse()
+
+	configFile := "/etc/cheatsh/commands.json"
+
+	var commands CmdList
+	var err error
+
+	if *configFlag != "" {
+		commands, err = loadCommands(*configFlag)
+		if err != nil {
+			log.Fatalf("Cannot load commands file: %v", err)
+		}
+		StartTui(commands)
+		return
+	} else if len(os.Args) == 1 {
+		commands, err = loadCommands(configFile)
+		if err != nil {
+			log.Fatalf("Cannot load commands file: %v", err)
+		}
+		StartTui(commands)
+		return
+	}
+
+	switch {
+
+		case *helpFlag:
+			printHelp()
+
+		case *newFlag:
+			HandleInput()
+
+		default:
+			printHelp()
+			os.Exit(1)
+
+	}
+
+}
+
+func printHelp() {
+	fmt.Println(`Usage: cheatsh [options]
+	Options:
+	  --config <file>  Specify a config file
+	  --help           Show this help message
+	  --new            Add a new command to the config file`)
+}
+
+func loadCommands(path string) (CmdList, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var m CmdMap
-	if err := json.Unmarshal(data, &m); err != nil {
+	var raw map[string][]CmdItem
+	err = json.Unmarshal(data, &raw)
+	if err != nil {
 		return nil, err
 	}
-	return m, nil
-}
 
-// Function Called when a subset of functions has been selected
-func showCommandList(app *tview.Application, lang string, cmds []CmdItem, langList *tview.List) {
-	cmdList := tview.NewList()
-	cmdList.SetBorder(true).SetTitle(fmt.Sprintf("%s commands", lang))
-
-	for _, c := range cmds {
-		c := c
-		cmdList.AddItem(c.CommandName, c.CommandDescription, 0, func() {
-			//fmt.Println(c.CommandName)
-			app.Suspend(func() {
-				fmt.Println(c.CommandName) // this now prints visibly
-			})
-			app.Stop()
-			os.Exit(0)
+	cmdList := make(CmdList, 0, len(raw))
+	for category, commands := range raw {
+		cmdList = append(cmdList, CmdGroup{
+			Category: category,
+			Commands: commands,
 		})
 	}
 
-	cmdList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 'b' || event.Key() == tcell.KeyEscape {
-			// Restore the language list
-			app.SetRoot(langList, true)
-			return nil
-		}
-		return event
+	sort.Slice(cmdList, func(i, j int) bool {
+		return cmdList[i].Category < cmdList[j].Category
 	})
 
-	app.SetRoot(cmdList, true)
-}
-
-// Main Function
-// Initialises the first page and starts app
-func main() {
-	commands, err := loadCommands("data/commands.json")
-	if err != nil {
-		log.Fatalf("Cannot load commands file: %v", err)
-	}
-
-	app := tview.NewApplication()
-
-	// Sort alphabetically
-	langs := make([]string, 0, len(commands))
-	for lang := range commands {
-		langs = append(langs, lang)
-	}
-	sort.Strings(langs)
-
-	langList := tview.NewList()
-	langList.SetBorder(true).SetTitle("Select a topic")
-
-	for _, lang := range langs {
-		lang := lang // capture loop variable
-		langList.AddItem(lang, "", 0, func() {
-			showCommandList(app, lang, commands[lang], langList)
-		})
-	}
-
-	if err := app.SetRoot(langList, true).Run(); err != nil {
-		log.Fatalf("Error initialising TUI: %v", err)
-	}
+	return cmdList, nil
 }

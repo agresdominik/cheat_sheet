@@ -68,5 +68,11 @@
       "command": "GOOS=linux GOARCH=amd64 go build -o bin/myprogram.exe main.go",
       "desc": "Cross-compile for Linux (alt. windows, darwin (arm64 / amd64))"
     }
+  ],
+  "git": [
+    {
+      "command": "git checkout -b branch_name",
+      "desc": "Create and checkout a new branch"
+    }
   ]
 }

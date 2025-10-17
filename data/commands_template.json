@@ -1,0 +1,18 @@
+{
+  "language/system": [
+    {
+      "command": "the actual command",
+      "desc": "Describe the command here"
+    },
+    {
+      "command": "and add any amount of commands below",
+      "desc": "Describe them"
+    }
+  ],
+  "different language/system": [
+    {
+      "command": "the command for a different language",
+      "desc": "Describe it"
+    }
+  ]
+}
