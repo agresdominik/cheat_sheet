@@ -77,6 +77,10 @@
     {
       "command": "git reflog",
       "desc": "Show history of all changes"
+    },
+    {
+      "command": "git remote set-url origin git@github.com:username/repo.git",
+      "desc": "Change origin url (example from https to ssh)"
     }
   ]
 }
