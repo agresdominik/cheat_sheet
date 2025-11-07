@@ -82,5 +82,39 @@
       "command": "git remote set-url origin git@github.com:username/repo.git",
       "desc": "Change origin url (example from https to ssh)"
     }
+  ],
+  "gpg": [
+    {
+      "command": "gpg --list-keys",
+      "desc": "List all imported keys"
+    },
+    {
+      "command": "gpg --import pubkey.asc",
+      "desc": "Import a downloaded key"
+    },
+    {
+      "command": "gpg --encrypt --sign --recipient RECIPIENT_KEY_ID message.txt",
+      "desc": "Encrypts message.txt with the recipients key into message.txt.gpg"
+    },
+    {
+      "command": "gpg --decrypt message.asc",
+      "desc": "Decrypt a file with a encrypted message"
+    },
+    {
+      "command": "gpg --export -a KEY_ID > publickey.asc",
+      "desc": "Export a existing (public) key into a file"
+    },
+    {
+      "command": "gpg --fingerprint KEY_ID",
+      "desc": "Check fingerprint of key"
+    },
+    {
+      "command": "gpg --sign-key RECIPIENT_KEY_ID",
+      "desc": "Sign a key"
+    },
+    {
+      "command": "gpg --keyserver hkps://keys.openpgp.org --send-keys RECIPIENT_KEY_ID",
+      "desc": "Send a signed key to a keyserver"
+    }
   ]
 }
