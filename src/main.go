@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"sort"
+	"path/filepath"
 )
 
 type CmdGroup struct {
@@ -39,10 +40,19 @@ func main() {
 
 	flag.Parse()
 
-	configFile := "/etc/cheatsh/commands.json"
+	var configFile string
+
+	home, err := os.UserHomeDir()
+	if err == nil {
+        userConf := filepath.Join(home, ".config", "cheatsh")
+        if info, err := os.Stat(userConf); err == nil && info.IsDir() {
+        	configFile = filepath.Join(userConf, "commands.json")
+        } else {
+        	configFile = "/etc/cheatsh/commands.json"
+        }
+    }
 
 	var commands CmdList
-	var err error
 
 	if *configFlag != "" {
 		commands, err = loadCommands(*configFlag)

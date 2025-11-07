@@ -1,8 +1,8 @@
 EXECUTABLE = cheatsh
 PACKAGES = ./src/.
 BINDIR = bin
-SYSCONFDIR = /etc/cheatsh
-PREFIX ?= /usr/local
+SYSCONFDIR = $(HOME)/.config/cheatsh
+PREFIX ?= $(HOME)/.local
 
 all: build
 
