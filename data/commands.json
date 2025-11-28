@@ -143,8 +143,12 @@
       "desc": "Scan a ssh port for all ssh relavant info"
     },
     {
-      "command": "chkrootkit / rkhunter --check / lyns audit system",
+      "command": "chkrootkit / rkhunter --check / lynis audit system",
       "desc": "System checking tools for malware and auditing on linux"
+    },
+    {
+      "command": "arch-audit",
+      "desc": "Audit installed packages for known vulnerabilities (pacman)"
     }
   ]
 }
