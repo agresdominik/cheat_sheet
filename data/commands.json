@@ -29,6 +29,14 @@
     {
       "command": "python3 -m venv .venv && source .venv/bin/activate",
       "desc": "Initialise a (simple) .venv and activate it"
+    },
+    {
+      "command": "pip install jupyterlab ipykernel && python3 -m ipykernel install --user --name=project-name",
+      "desc": "Install and initialise the kernel to use in jupyter"
+    },
+    {
+      "command": "jupyter lab",
+      "desc": "Start Jupyiter Lab"
     }
   ],
   "go": [
@@ -115,6 +123,32 @@
     {
       "command": "gpg --keyserver hkps://keys.openpgp.org --send-keys RECIPIENT_KEY_ID",
       "desc": "Send a signed key to a keyserver"
+    }
+  ],
+  "security": [
+    {
+      "command": "firejail --private --net=none <application>",
+      "desc": "Run a command in a sandbox with no access to the home dir or the network"
+    },
+    {
+      "command": "nmap -p- -A <ip-address>",
+      "desc": "Scan a IP Address for open ports and os information"
+    },
+    {
+      "command": "nmap -p <port-num> -sV <ip-address>",
+      "desc": "Scan a specific port to see more information about service running"
+    },
+    {
+      "command": "nmap -p <port-num> --script ssh* <ip-address>",
+      "desc": "Scan a ssh port for all ssh relavant info"
+    },
+    {
+      "command": "chkrootkit / rkhunter --check / lynis audit system",
+      "desc": "System checking tools for malware and auditing on linux"
+    },
+    {
+      "command": "arch-audit",
+      "desc": "Audit installed packages for known vulnerabilities (pacman)"
     }
   ]
 }
