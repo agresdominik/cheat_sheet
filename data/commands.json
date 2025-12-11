@@ -206,5 +206,61 @@
       "command": "arch-audit",
       "desc": "Audit installed packages for known vulnerabilities (pacman)"
     }
+  ],
+  "package managers": [
+    {
+      "command": "pacman -Syu / yay -Syu / dnf update / apt update && apt upgrade",
+      "desc": "Linux base package managers"
+    },
+    {
+      "command": "flatpak update",
+      "desc": "Flathub extra sandboxed applications"
+    },
+    {
+      "command": "npm update -g",
+      "desc": "Npm installed packages on system"
+    },
+    {
+      "command": "pipx upgrade-all",
+      "desc": "Pip installed packages on system"
+    }
+  ],
+  "other installs": [
+    {
+      "command": "glow",
+      "desc": "Terminal Markdown Renderer"
+    },
+    {
+      "command": "pinta",
+      "desc": "Image editor"
+    },
+    {
+      "command": "bottles",
+      "desc": "Wine wrapper"
+    },
+    {
+      "command": "zathura",
+      "desc": "PDF File viewer"
+    },
+    {
+      "command": "sqlitebrowser",
+      "desc": "SQL File browser"
+    },
+    {
+      "command": "lact",
+      "desc": "GPU Overclock Utility"
+    },
+    {
+      "command": "baobab",
+      "desc": "Directory usage analysis"
+    },
+    {
+      "command": "gsmartcontrol",
+      "desc": "Disk S.M.A.R.T analysis"
+    },
+    {
+      "command": "pavucontrol",
+      "desc": "Audio Control"
+    }
   ]
 }
