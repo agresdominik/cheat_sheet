@@ -39,7 +39,11 @@
     {
       "command": "zip -r folder_name.zip folder_name",
       "desc": "Zip a folder and all of its contents into a archive"
-    }
+    },
+    {
+      "command": "ln -s /path/to/file file",
+      "desc": "Create a symbolic link pointing to a file on the system"
+    },
   ],
   "python": [
     {
