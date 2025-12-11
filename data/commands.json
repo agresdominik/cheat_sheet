@@ -43,7 +43,7 @@
     {
       "command": "ln -s /path/to/file file",
       "desc": "Create a symbolic link pointing to a file on the system"
-    },
+    }
   ],
   "python": [
     {
