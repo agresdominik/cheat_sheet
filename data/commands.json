@@ -21,8 +21,16 @@
       "desc": "Show open ports on current host (linux)"
     },
     {
-      "command": "echo Hostname: $(hostname); echo Local_IP: $(hostname -I | awk '{print $1}'); echo Default_Gateway: $(ip route | awk '/default/ {print $3}')",
+      "command": "echo Hostname: $(hostname); echo Local_IP: $(hostname -i | awk '{print $1}'); echo Default_Gateway: $(ip route | awk '/default/ {print $3}')",
       "desc": "Print IP Address, Hostname, Default Route"
+    }
+    {
+      "command": "find . -type f -iname 'myfile.txt'",
+      "desc": "Search for a specific file in folder (recursive, case-insensitive (use -name for case sensitive))"
+    },
+    {
+      "command": "zip -r folder_name.zip folder_name",
+      "desc": "Zip a folder and all of its contents into a archive"
     }
   ],
   "python": [
