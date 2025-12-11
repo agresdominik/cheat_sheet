@@ -9,6 +9,10 @@
       "desc": "Show statistics about a drive (remove path for all)"
     },
     {
+      "command": "free -h",
+      "desc": "Display memory usage in human-readable units"
+    },
+    {
       "command": "find /path/to/directory -type f | wc -l",
       "desc": "Show amount of files in directory and its sub-directories"
     },
@@ -23,6 +27,10 @@
     {
       "command": "echo Hostname: $(hostname); echo Local_IP: $(hostname -i | awk '{print $1}'); echo Default_Gateway: $(ip route | awk '/default/ {print $3}')",
       "desc": "Print IP Address, Hostname, Default Route"
+    },
+    {
+      "command": "tar -czf backup.tgz /path/to/dir",
+      "desc": "Create a quick compressed backup of a directory"
     }
     {
       "command": "find . -type f -iname 'myfile.txt'",
@@ -39,6 +47,18 @@
       "desc": "Initialise a (simple) .venv and activate it"
     },
     {
+      "command": "python -m http.server 8000",
+      "desc": "Serve the current directory over HTTP on port 8000"
+    },
+    {
+      "command": "python -m pip install --upgrade pip",
+      "desc": "Upgrade pip to the latest version"
+    },
+    {
+      "command": "python -m pip freeze > requirements.txt",
+      "desc": "Export current Python dependencies to requirements.txt"
+    },
+    {
       "command": "pip install jupyterlab ipykernel && python3 -m ipykernel install --user --name=project-name",
       "desc": "Install and initialise the kernel to use in jupyter"
     },
@@ -51,6 +71,18 @@
     {
       "command": "go mod init github.com/username/projectname",
       "desc": "Initialise a go project and create a mod file"
+    },
+    {
+      "command": "go test ./...",
+      "desc": "Run all Go tests recursively"
+    },
+    {
+      "command": "go test -bench=. ./...",
+      "desc": "Run all benchmarks in the module"
+    },
+    {
+      "command": "go list -m all",
+      "desc": "List all resolved module dependencies"
     },
     {
       "command": "go get github.com/some/package@latest",
