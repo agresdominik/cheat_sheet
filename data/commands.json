@@ -119,12 +119,24 @@
       "desc": "Rebase commits from source branch to target branch"
     },
     {
-      "command": "git stash",
+      "command": "git merge <target_branch>",
+      "desc": "Merge commits from another branch into the one command is run on"
+    },
+    {
+      "command": "git stash push -m 'Message/Stash Name'",
       "desc": "Stash changes without commiting"
+    },
+    {
+      "command": "git stash pop",
+      "desc": "Stash changes without commiting (add stash@{n} for specific stash from 'git stash list'"
     },
     {
       "command": "git reflog",
       "desc": "Show history of all changes"
+    },
+    {
+      "command": "git status",
+      "desc": "See what is changed right now"
     },
     {
       "command": "git remote set-url origin git@github.com:username/repo.git",
