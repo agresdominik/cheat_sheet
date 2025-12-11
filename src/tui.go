@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	//"sort"
-	//"strings"
-
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -30,6 +27,7 @@ type model struct {
 	currentView view
 	currentKey	string
 	selectedCmd string
+	categoryIndex int
 }
 func (m model) Init() tea.Cmd { return nil }
 
@@ -48,10 +46,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					selected, ok := m.list.SelectedItem().(item)
 					if ok {
 						if m.currentView == viewCategories {
+							m.categoryIndex = m.list.Index()
 							m.currentKey = selected.title
 							m.currentView = viewCommands
 							m.list.Title = m.currentKey
 							m.list.SetItems(cmdItemsToList(m.commands.Get(m.currentKey)))
+							m.list.Select(0)
 					} else if m.currentView == viewCommands {
 							m.selectedCmd = selected.title
 							return m, tea.Quit
@@ -64,6 +64,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.currentView = viewCategories
 						m.list.Title = "Choose a list of commands"
 						m.list.SetItems(cmdListKeysToList(m.commands))
+						m.list.Select(m.categoryIndex)
 					}
 
 			}
