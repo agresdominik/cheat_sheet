@@ -31,7 +31,7 @@
     {
       "command": "tar -czf backup.tgz /path/to/dir",
       "desc": "Create a quick compressed backup of a directory"
-    }
+    },
     {
       "command": "find . -type f -iname 'myfile.txt'",
       "desc": "Search for a specific file in folder (recursive, case-insensitive (use -name for case sensitive))"
