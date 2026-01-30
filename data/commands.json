@@ -231,6 +231,10 @@
       "desc": "Terminal Markdown Renderer"
     },
     {
+      "command": "markserv .",
+      "desc": "Serve a webserver with rendered Markdown"
+    },
+    {
       "command": "pinta",
       "desc": "Image editor"
     },
