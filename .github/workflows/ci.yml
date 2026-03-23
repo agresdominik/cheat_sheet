@@ -110,3 +110,5 @@ jobs:
     with:
       version: ${{ needs.trigger-release.outputs.version }}
     secrets: inherit
+    permissions:
+      contents: write
