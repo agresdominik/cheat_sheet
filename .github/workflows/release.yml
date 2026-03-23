@@ -83,25 +83,25 @@ jobs:
           echo "Tarball URL : $URL"
           echo "SHA256      : $SHA"
 
-      # - name: Checkout homebrew tap
-      #  uses: actions/checkout@v4
-      #  with:
-      #    repository: TODO_GITHUB_USER/homebrew-myapps   # TODO: your tap repo
-      #    token: ${{ secrets.TAP_GITHUB_TOKEN }}
-      #    path: tap
+      - name: Checkout homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: agresdominik/repo
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: tap
 
-      #- name: Patch cheatsh formula
-      #  run: |
-      #    FORMULA="tap/Formula/cheatsh.rb"
-      #    sed -i "s|url .*|url     \"${{ steps.sha.outputs.url }}\"|"              "$FORMULA"
-      #    sed -i "s|version .*|version \"${{ inputs.version }}\"|"                 "$FORMULA"
-      #    sed -i "s|sha256 .*|sha256  \"${{ steps.sha.outputs.sha }}\"|"           "$FORMULA"
+      - name: Patch cheatsh formula
+        run: |
+          FORMULA="tap/Formula/cheatsh.rb"
+          sed -i "s|url .*|url     \"${{ steps.sha.outputs.url }}\"|"              "$FORMULA"
+          sed -i "s|version .*|version \"${{ inputs.version }}\"|"                 "$FORMULA"
+          sed -i "s|sha256 .*|sha256  \"${{ steps.sha.outputs.sha }}\"|"           "$FORMULA"
 
-      #- name: Commit and push tap update
-      #  run: |
-      #    cd tap
-      #    git config user.name  "github-actions[bot]"
-      #    git config user.email "github-actions[bot]@users.noreply.github.com"
-      #    git diff --quiet && echo "Formula already up to date." && exit 0
-      #    git commit -am "formula: bump cheatsh to v${{ inputs.version }}"
-      #    git push
+      - name: Commit and push tap update
+        run: |
+          cd tap
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet && echo "Formula already up to date." && exit 0
+          git commit -am "chore: bump cheatsh to v${{ inputs.version }}"
+          git push
