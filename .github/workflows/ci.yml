@@ -24,6 +24,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Validate command JSON files
+        run: |
+          jq empty data/commands.json
+          jq empty data/commands_template.json
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
