@@ -223,6 +223,10 @@
     {
       "command": "pipx upgrade-all",
       "desc": "Pip installed packages on system"
+    },
+    {
+      "command": "brew update",
+      "desc": "Brew installed own software"
     }
   ],
   "other installs": [
