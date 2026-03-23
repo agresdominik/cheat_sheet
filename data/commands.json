@@ -231,6 +231,10 @@
       "desc": "Terminal Markdown Renderer"
     },
     {
+      "command": "markserv .",
+      "desc": "Serve a webserver with rendered Markdown"
+    },
+    {
       "command": "pinta",
       "desc": "Image editor"
     },
@@ -261,6 +265,14 @@
     {
       "command": "pavucontrol",
       "desc": "Audio Control"
+    },
+    {
+      "command": "pdfunite file.pdf file.pdf united.pdf",
+      "desc": "Unite multiple pdf files into one"
+    },
+    {
+      "command": "qpdf --password='' --decrypt encrypted_file.pdf decrypted_file.pdf",
+      "desc": "Decrypt (or encrypt with --encrypt) a pdf file"
     }
   ]
 }

@@ -1,0 +1,112 @@
+# .github/workflows/ci.yml
+#
+# Runs on every push to main and on every pull request targeting main.
+# Pipeline: golangci-lint → go test → make build
+# If all three pass on main, the release workflow is triggered automatically.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m ./src/...
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: go test -v -race -coverprofile=coverage.out ./src/...
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build binary
+        run: make build
+
+      - name: Smoke test binary
+        run: ./bin/cheatsh --help
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cheatsh-${{ runner.os }}
+          path: bin/cheatsh
+
+  # Only fires on pushes to main (not PRs) after build passes.
+  # Checks whether the VERSION file was changed — if so, triggers a release.
+  trigger-release:
+    name: Trigger Release
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # need the previous commit to diff
+
+      - name: Check if VERSION changed
+        id: check
+        run: |
+          if git diff HEAD~1 HEAD --name-only | grep -q '^VERSION$'; then
+            VERSION=$(cat VERSION)
+            echo "changed=true"   >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "VERSION changed to $VERSION — release will be created."
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "VERSION unchanged — skipping release."
+          fi
+
+  release:
+    name: Release
+    needs: [trigger-release]
+    if: needs.trigger-release.outputs.version_changed == 'true'
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ needs.trigger-release.outputs.version }}
+    secrets: inherit
