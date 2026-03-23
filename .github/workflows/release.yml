@@ -1,0 +1,107 @@
+# .github/workflows/release.yml
+#
+# Called by ci.yml when VERSION changes on main.
+# Can also be triggered manually via workflow_dispatch for hotfixes.
+
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (without v prefix, e.g. 1.2.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Tag, Build & Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version matches VERSION file
+        run: |
+          FILE_VERSION=$(cat VERSION)
+          INPUT_VERSION="${{ inputs.version }}"
+          if [ "$FILE_VERSION" != "$INPUT_VERSION" ]; then
+            echo "ERROR: VERSION file ($FILE_VERSION) does not match input ($INPUT_VERSION)"
+            exit 1
+          fi
+
+      - name: Check tag availability
+        run: |
+          TAG="v${{ inputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
+            echo "ERROR: Tag $TAG already exists."
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build
+        run: make build
+
+      - name: Create git tag
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          generate_release_notes: true
+          files: bin/cheatsh
+
+      - name: Compute tarball sha256
+        id: sha
+        run: |
+          URL="https://github.com/${{ github.repository }}/archive/refs/tags/v${{ inputs.version }}.tar.gz"
+          echo "Waiting briefly for GitHub to process the release tarball..."
+          sleep 10
+          SHA=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
+          echo "sha=$SHA"   >> $GITHUB_OUTPUT
+          echo "url=$URL"   >> $GITHUB_OUTPUT
+          echo "Tarball URL : $URL"
+          echo "SHA256      : $SHA"
+
+      # - name: Checkout homebrew tap
+      #  uses: actions/checkout@v4
+      #  with:
+      #    repository: TODO_GITHUB_USER/homebrew-myapps   # TODO: your tap repo
+      #    token: ${{ secrets.TAP_GITHUB_TOKEN }}
+      #    path: tap
+
+      #- name: Patch cheatsh formula
+      #  run: |
+      #    FORMULA="tap/Formula/cheatsh.rb"
+      #    sed -i "s|url .*|url     \"${{ steps.sha.outputs.url }}\"|"              "$FORMULA"
+      #    sed -i "s|version .*|version \"${{ inputs.version }}\"|"                 "$FORMULA"
+      #    sed -i "s|sha256 .*|sha256  \"${{ steps.sha.outputs.sha }}\"|"           "$FORMULA"
+
+      #- name: Commit and push tap update
+      #  run: |
+      #    cd tap
+      #    git config user.name  "github-actions[bot]"
+      #    git config user.email "github-actions[bot]@users.noreply.github.com"
+      #    git diff --quiet && echo "Formula already up to date." && exit 0
+      #    git commit -am "formula: bump cheatsh to v${{ inputs.version }}"
+      #    git push
