@@ -1,8 +1,8 @@
 EXECUTABLE = cheatsh
 PACKAGES = ./src/.
 BINDIR = bin
-SYSCONFDIR = $(HOME)/.config/cheatsh
 PREFIX ?= $(HOME)/.local
+DATADIR = $(PREFIX)/share/cheatsh
 
 all: build
 
@@ -12,16 +12,16 @@ build:
 
 install: build
 
-	@echo "Installing binary in $(PREFIX)"
+	@echo "Installing binary in $(PREFIX)/bin"
 	install -Dm755 bin/$(EXECUTABLE) $(PREFIX)/bin/$(EXECUTABLE)
 
-	@echo "Copying config files to $(SYSCONFDIR)"
-	install -Dm644 data/commands.json $(SYSCONFDIR)/commands.json
-	install -Dm644 data/commands_template.json $(SYSCONFDIR)/commands_template.json
+	@echo "Installing command lists in $(DATADIR)"
+	install -Dm644 data/commands.json $(DATADIR)/commands.json
+	install -Dm644 data/commands_template.json $(DATADIR)/commands_template.json
 
 uninstall:
 	rm -f $(PREFIX)/bin/$(EXECUTABLE)
-	rm -rf $(SYSCONFDIR)
+	rm -rf $(DATADIR)
 
 clean:
 	rm -rf bin/

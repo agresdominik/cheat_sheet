@@ -40,56 +40,54 @@ func main() {
 
 	flag.Parse()
 
-	var configFile string
-
-	home, err := os.UserHomeDir()
-	if err == nil {
-        userConf := filepath.Join(home, ".config", "cheatsh")
-        if info, err := os.Stat(userConf); err == nil && info.IsDir() {
-        	configFile = filepath.Join(userConf, "commands.json")
-        } else {
-        	configFile = "/etc/cheatsh/commands.json"
-        }
-    }
-
-	var commands CmdList
-
-	if *configFlag != "" {
-		commands, err = loadCommands(*configFlag)
-		if err != nil {
-			log.Fatalf("Cannot load commands file: %v", err)
-		}
-		StartTui(commands)
-		return
-	} else if len(os.Args) == 1 {
-		commands, err = loadCommands(configFile)
-		if err != nil {
-			log.Fatalf("Cannot load commands file: %v", err)
-		}
-		StartTui(commands)
-		return
-	}
-
 	switch {
-
-		case *helpFlag:
-			printHelp()
-
-		case *newFlag:
-			HandleInput()
-
-		default:
-			printHelp()
-			os.Exit(1)
-
+	case *helpFlag:
+		printHelp()
+		return
+	case *newFlag:
+		HandleInput()
+		return
 	}
 
+	configFile := *configFlag
+	if configFile == "" {
+		configFile = defaultConfigPath()
+	}
+
+	commands, err := loadCommands(configFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Fatalf("No config found at %s\nPass a config explicitly with --config <file>.", configFile)
+		}
+		log.Fatalf("Cannot load commands file: %v", err)
+	}
+
+	StartTui(commands)
+}
+
+// defaultConfigPath returns the bundled command list installed next to the
+// binary (<prefix>/share/cheatsh/commands.json, replaced on upgrade). When
+// running from a source checkout that file doesn't exist, so it falls back to
+// data/commands.json relative to the working directory.
+func defaultConfigPath() string {
+	if exe, err := os.Executable(); err == nil {
+		if real, err := filepath.EvalSymlinks(exe); err == nil {
+			exe = real
+		}
+		p := filepath.Join(filepath.Dir(exe), "..", "share", "cheatsh", "commands.json")
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+	return filepath.Join("data", "commands.json")
 }
 
 func printHelp() {
 	fmt.Println(`Usage: cheatsh [options]
+	Select a command to copy it to the system clipboard.
+	Without --config the bundled command list is used; pass --config to use your own.
 	Options:
-	  --config <file>  Specify a config file
+	  --config <file>  Use a custom config file
 	  --help           Show this help message
 	  --new            Add a new command to the config file`)
 }
