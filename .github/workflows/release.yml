@@ -92,9 +92,9 @@ jobs:
 
       - name: Patch cheatsh formula
         run: |
+          # version is inferred by Homebrew from the URL tag, so only url + sha256 are patched.
           FORMULA="tap/Formula/cheatsh.rb"
           sed -i "s|url .*|url     \"${{ steps.sha.outputs.url }}\"|"              "$FORMULA"
-          sed -i "s|version .*|version \"${{ inputs.version }}\"|"                 "$FORMULA"
           sed -i "s|sha256 .*|sha256  \"${{ steps.sha.outputs.sha }}\"|"           "$FORMULA"
 
       - name: Commit and push tap update

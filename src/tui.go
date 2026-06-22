@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -128,7 +129,12 @@ func StartTui(commands CmdList) {
 	}
 
 	if m, ok := finalModel.(model); ok && m.selectedCmd != "" {
-		fmt.Println(m.selectedCmd)
+		if err := clipboard.WriteAll(m.selectedCmd); err != nil {
+			fmt.Fprintln(os.Stderr, "Could not copy to clipboard:", err)
+			fmt.Println(m.selectedCmd)
+			return
+		}
+		fmt.Println("Copied to clipboard:", m.selectedCmd)
 	}
 }
 
