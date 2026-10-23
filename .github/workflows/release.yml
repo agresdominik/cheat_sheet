@@ -2,6 +2,9 @@
 #
 # Called by ci.yml when VERSION changes on main.
 # Can also be triggered manually via workflow_dispatch for hotfixes.
+#
+# The Homebrew tap (agresdominik/repo) is not touched here: Renovate picks up the new tag
+# and opens a PR there that bumps the formula's url + sha256.
 
 name: Release
 
@@ -71,37 +74,3 @@ jobs:
           generate_release_notes: true
           files: bin/cheatsh
 
-      - name: Compute tarball sha256
-        id: sha
-        run: |
-          URL="https://github.com/${{ github.repository }}/archive/refs/tags/v${{ inputs.version }}.tar.gz"
-          echo "Waiting briefly for GitHub to process the release tarball..."
-          sleep 10
-          SHA=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
-          echo "sha=$SHA"   >> $GITHUB_OUTPUT
-          echo "url=$URL"   >> $GITHUB_OUTPUT
-          echo "Tarball URL : $URL"
-          echo "SHA256      : $SHA"
-
-      - name: Checkout homebrew tap
-        uses: actions/checkout@v4
-        with:
-          repository: agresdominik/repo
-          token: ${{ secrets.TAP_GITHUB_TOKEN }}
-          path: tap
-
-      - name: Patch cheatsh formula
-        run: |
-          # version is inferred by Homebrew from the URL tag, so only url + sha256 are patched.
-          FORMULA="tap/Formula/cheatsh.rb"
-          sed -i "s|url .*|url     \"${{ steps.sha.outputs.url }}\"|"              "$FORMULA"
-          sed -i "s|sha256 .*|sha256  \"${{ steps.sha.outputs.sha }}\"|"           "$FORMULA"
-
-      - name: Commit and push tap update
-        run: |
-          cd tap
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet && echo "Formula already up to date." && exit 0
-          git commit -am "chore: bump cheatsh to v${{ inputs.version }}"
-          git push
