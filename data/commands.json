@@ -29,16 +29,24 @@
       "desc": "Print IP Address, Hostname, Default Route"
     },
     {
-      "command": "tar -czf backup.tgz /path/to/dir",
+      "command": "tar -czf FILE.tgz /path/to/dir",
       "desc": "Create a quick compressed backup of a directory"
     },
     {
-      "command": "find . -type f -iname 'myfile.txt'",
+      "command": "tar -xzf FILE.tar.gz -C /path/to/dir",
+      "desc": "Unzip a compressed directory into a directory"
+    },
+    {
+      "command": "find . -type f -iname 'FILE.txt'",
       "desc": "Search for a specific file in folder (recursive, case-insensitive (use -name for case sensitive))"
     },
     {
-      "command": "zip -r folder_name.zip folder_name",
+      "command": "zip -r FILE.zip DIRECTORY-NAME",
       "desc": "Zip a folder and all of its contents into a archive"
+    },
+    {
+      "command": "unzip FILE.zip -d DIRECTORY-NAME",
+      "desc": "Unzip a folder and all of its contents into a directory"
     },
     {
       "command": "ln -s /path/to/file file",
@@ -145,6 +153,10 @@
     {
       "command": "git remote set-url origin git@github.com:username/repo.git",
       "desc": "Change origin url (example from https to ssh)"
+    },
+    {
+      "command": "git switch main && git pull && git tag -a TAG-NAME -m \"TAG-MESSAGE\" && git push origin TAG-NAME",
+      "desc": "Create a Tag on the latest commit on main"
     }
   ],
   "gpg": [
